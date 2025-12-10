@@ -6,27 +6,37 @@ import {HookMiner} from "@uniswap/v4-periphery/src/utils/HookMiner.sol";
 
 import {BaseScript} from "./base/BaseScript.sol";
 
-import {Counter} from "../src/Counter.sol";
+import {EigenShieldHook} from "../src/EigenShieldHook.sol";
 
-/// @notice Mines the address and deploys the Counter.sol Hook contract
+/// @notice Mines the address and deploys the EigenShieldHook contract
 contract DeployHookScript is BaseScript {
+    address internal constant CREATE2_DEPLOYER = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
+
     function run() public {
         // hook contracts must have specific flags encoded in the address
-        uint160 flags = uint160(
-            Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.BEFORE_ADD_LIQUIDITY_FLAG
-                | Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG
-        );
+        uint160 flags = uint160(Hooks.BEFORE_SWAP_FLAG);
 
         // Mine a salt that will produce a hook address with the correct flags
-        bytes memory constructorArgs = abi.encode(poolManager);
+        address[] memory operators = new address[](3);
+        operators[0] = vm.addr(11);
+        operators[1] = vm.addr(22);
+        operators[2] = vm.addr(33);
+
+        uint16 quorumBps = 6700; // 67% quorum
+        uint8 minConfidence = 60; // minimum confidence threshold (0-100)
+        uint32 freshnessWindow = 300; // seconds
+
+        bytes memory constructorArgs =
+            abi.encode(poolManager, operators, quorumBps, minConfidence, freshnessWindow);
         (address hookAddress, bytes32 salt) =
-            HookMiner.find(CREATE2_FACTORY, flags, type(Counter).creationCode, constructorArgs);
+            HookMiner.find(CREATE2_DEPLOYER, flags, type(EigenShieldHook).creationCode, constructorArgs);
 
         // Deploy the hook using CREATE2
         vm.startBroadcast();
-        Counter counter = new Counter{salt: salt}(poolManager);
+        EigenShieldHook hook =
+            new EigenShieldHook{salt: salt}(poolManager, operators, quorumBps, minConfidence, freshnessWindow);
         vm.stopBroadcast();
 
-        require(address(counter) == hookAddress, "DeployHookScript: Hook Address Mismatch");
+        require(address(hook) == hookAddress, "DeployHookScript: Hook Address Mismatch");
     }
 }
