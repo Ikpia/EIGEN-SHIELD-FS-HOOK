@@ -97,7 +97,7 @@ Deploy a slashable EigenLayer AVS network where restaker-operated watchtowers co
 
 ## Diagrams & Flow
 
-### System Architecture Overview
+### System Architecture Overview (User Perspective)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -168,7 +168,7 @@ Deploy a slashable EigenLayer AVS network where restaker-operated watchtowers co
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Sandwich Attack Detection Flow
+### Sandwich Attack Detection Flow (Technical Perspective)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -227,7 +227,7 @@ Deploy a slashable EigenLayer AVS network where restaker-operated watchtowers co
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### User Perspective Flow
+### User Experience Flow
 
 ```
 User Experience Flow:
@@ -281,9 +281,9 @@ Technical Components:
 │            EigenCompute TEE Detection Engine                │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │  Sandwich Detection Algorithms                       │  │
-│  │  • Pattern matching                                  │  │
+│  │  • Pattern matching                                 │  │
 │  │  • Gas price analysis                                │  │
-│  │  • Multi-hop detection                                │  │
+│  │  • Multi-hop detection                               │  │
 │  │  • Cryptographic attestations                         │  │
 │  └──────────────────────────────────────────────────────┘  │
 └────────────────────────┬────────────────────────────────────┘
@@ -460,68 +460,6 @@ def ai_classify_attack(tx_data, seed):
 
 ---
 
-## Tests & Coverage
-
-### Test Suite
-
-The project includes comprehensive test coverage using Foundry:
-
-- **Test File**: `test/EigenShieldHook.t.sol`
-- **Test Framework**: Foundry (Forge)
-
-### Test Cases
-
-1. **`testSafeQuorumAllowsSwap()`**
-   - Verifies that swaps pass when quorum of operators attest "safe"
-   - Tests 100% safe votes (3/3 operators)
-
-2. **`testMaliciousQuorumBlocksSwap()`**
-   - Verifies that swaps are blocked when quorum detects malicious pattern
-   - Tests 100% malicious votes (3/3 operators)
-
-3. **`testInsufficientSafeQuorumReverts()`**
-   - Verifies that insufficient attestations revert
-   - Tests quorum threshold enforcement
-
-4. **`testStaleAttestationReverts()`**
-   - Verifies that stale attestations are rejected
-   - Tests freshness window validation
-
-### Running Tests
-
-```bash
-# Run all tests
-forge test
-
-# Run with verbose output
-forge test -vvv
-
-# Run specific test
-forge test --match-test testSafeQuorumAllowsSwap
-
-# Run with gas reporting
-forge test --gas-report
-```
-
-### Coverage
-
-To generate coverage reports:
-
-```bash
-# Generate coverage report
-forge coverage
-
-# Generate coverage with LCOV format
-forge coverage --report lcov
-
-# View coverage summary
-forge coverage --report summary
-```
-
-**Target Coverage**: 100% line and function coverage for production contracts.
-
----
-
 ## Installation
 
 ### Prerequisites
@@ -553,19 +491,15 @@ go mod download
 Copy the example environment file and configure:
 
 ```bash
-# For backend services
-cp eigenshield-fs-avs/env.example eigenshield-fs-avs/.env
+# Copy example environment file
+cp .env.example .env
 
 # Edit .env with your configuration
 # Required variables:
-# - MATCHER_ENDPOINT
-# - ALLOWED_DOCKER_DIGESTS
-# - ALLOWED_TEE_MEASUREMENTS
-# - EXECUTOR_ENDPOINT
-# - POOL_ID
-# - EXECUTOR_CONTRACT
-# - EXECUTOR_CHAIN_ID
-# - WATCHER_PRIVATE_KEY
+# - PRIVATE_KEY (for deployment)
+# - DEPLOYER_PRIVATE_KEY
+# - BASE_SEPOLIA_RPC_URL (or other network RPC)
+# - BASE_SEPOLIA_POOL_MANAGER
 ```
 
 ---
@@ -623,14 +557,17 @@ make build-contracts
 ### Deployment Scripts
 
 ```bash
-# Deploy hook
-forge script script/00_DeployHook.s.sol --rpc-url <RPC_URL> --broadcast
+# Deploy hook to Base Sepolia
+./deploy-base-sepolia.sh
+
+# Or deploy manually
+forge script script/DeployBaseSepolia.s.sol:DeployBaseSepoliaScript \
+  --rpc-url $BASE_SEPOLIA_RPC_URL \
+  --broadcast \
+  -vvvv
 
 # Create pool and add liquidity
 forge script script/01_CreatePoolAndAddLiquidity.s.sol --rpc-url <RPC_URL> --broadcast
-
-# Add liquidity
-forge script script/02_AddLiquidity.s.sol --rpc-url <RPC_URL> --broadcast
 
 # Execute swap
 forge script script/03_Swap.s.sol --rpc-url <RPC_URL> --broadcast
@@ -659,11 +596,12 @@ go run services/watcher/cmd/watcher/main.go
 - [x] Basic Uniswap V4 hook implementation
 - [x] Quorum-based attestation verification
 - [x] Simple sandwich detection heuristics
-- [x] Test suite with 100% coverage
+- [x] Test suite with 100+ test cases
 - [x] Sepolia testnet deployment
 - [x] Mock operator setup (3 operators)
 
 ### Phase 2: Pilot (In Progress)
+- [ ] Base Sepolia deployment
 - [ ] Mainnet beta deployment on Base
 - [ ] Recruit 10-20 professional operators
 - [ ] EigenLayer AVS integration
@@ -737,7 +675,7 @@ go run services/watcher/cmd/watcher/main.go
 
 ### Testnet Transaction Hashes
 
-*Note: Add actual testnet transaction hashes here once deployed*
+*Note: Add actual testnet transaction hashes here once deployed to Base Sepolia*
 
 Example format:
 ```
@@ -813,16 +751,15 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ### Security
 
-For security concerns, please contact the maintainers directly.
+For security concerns, please see [SECURITY.md](SECURITY.md) or contact the maintainers directly.
 
 ---
 
 ## Contact & Links
 
-- **Repository**: [GitHub](https://github.com/your-org/eigenshield-fs-hook)
-- **Documentation**: [Docs](https://docs.eigenshield.xyz)
-- **Website**: [EigenShield](https://eigenshield.xyz)
-- **Twitter**: [@EigenShield](https://twitter.com/eigenshield)
+- **Repository**: [GitHub](https://github.com/Ikpia/EIGEN-SHIELD-FS-HOOK)
+- **Documentation**: See [docs/](docs/) directory
+- **Security**: See [SECURITY.md](SECURITY.md)
 
 ---
 
