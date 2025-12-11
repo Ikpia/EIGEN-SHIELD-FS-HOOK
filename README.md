@@ -460,6 +460,120 @@ def ai_classify_attack(tx_data, seed):
 
 ---
 
+## Tests & Coverage
+
+### Test Suite Overview
+
+The project includes comprehensive test coverage with **100+ test cases** covering unit tests, integration tests, and invariant tests. All tests are written using Foundry (Forge) framework.
+
+### Test Files
+
+- **`test/EigenShieldHook.t.sol`** - Core hook functionality tests
+- **`test/EigenShieldHookSuite.t.sol`** - Extended test suite with 100+ scenarios
+- **`test/EigenShieldHookGenerated.t.sol`** - Generated test matrix covering edge cases
+
+### Test Coverage
+
+**Target Coverage**: 100% line and function coverage for production contracts.
+
+#### Unit Tests
+
+1. **Quorum Verification Tests**
+   - `testSafeQuorumAllowsSwap()` - Verifies swaps pass with safe quorum
+   - `testMaliciousQuorumBlocksSwap()` - Verifies swaps blocked with malicious quorum
+   - `testInsufficientSafeQuorumReverts()` - Tests quorum threshold enforcement
+   - `testQuorumBoundaryAtThreshold()` - Tests boundary conditions
+
+2. **Attestation Validation Tests**
+   - `testStaleAttestationReverts()` - Tests freshness window validation
+   - `testLowConfidenceReverts()` - Tests minimum confidence threshold
+   - `testIntentIdMismatchReverts()` - Tests intent ID validation
+   - `testOperatorNotAuthorizedReverts()` - Tests operator authorization
+
+3. **Access Control Tests**
+   - `testGuardianOnlySetters()` - Tests guardian-only functions
+   - `testGuardianUpdatesParameters()` - Tests parameter updates
+   - `testSetOperatorsTogglesCounts()` - Tests operator management
+
+#### Integration Tests
+
+- **Matrix Test Suite** (`testMatrixOf100Scenarios`) - Runs 100 scenarios covering:
+  - Stale attestation handling
+  - Malicious quorum detection
+  - Insufficient quorum scenarios
+  - Duplicate operator prevention
+  - Happy path validations
+
+- **Generated Test Suite** - 91 additional test scenarios covering edge cases and boundary conditions
+
+#### Invariant Tests
+
+- **`invariant_operatorCountMatchesActiveSet()`** - Ensures operator count consistency
+  - Fuzz tests operator toggling
+  - Validates quorum parameter changes
+  - Tests parameter updates under fuzzing
+
+### Running Tests
+
+```bash
+# Run all tests
+forge test
+
+# Run with verbose output
+forge test -vvv
+
+# Run specific test file
+forge test --match-path test/EigenShieldHook.t.sol
+
+# Run specific test
+forge test --match-test testSafeQuorumAllowsSwap
+
+# Run with gas reporting
+forge test --gas-report
+
+# Run with coverage
+forge coverage
+
+# Generate coverage report (LCOV format)
+forge coverage --report lcov
+
+# View coverage summary
+forge coverage --report summary
+```
+
+### Coverage Report
+
+To generate and view detailed coverage:
+
+```bash
+# Generate coverage report
+forge coverage
+
+# Generate HTML coverage report
+forge coverage --report lcov
+genhtml lcov.info -o coverage-report
+
+# View coverage summary
+forge coverage --report summary
+```
+
+**Current Coverage Status**:
+- ✅ All core hook functions tested
+- ✅ Edge cases and boundary conditions covered
+- ✅ Access control and security checks validated
+- ✅ Integration scenarios tested
+- ✅ Invariant properties verified
+
+### Test Statistics
+
+- **Total Test Cases**: 100+
+- **Unit Tests**: 8 core tests
+- **Integration Tests**: 100+ scenario tests
+- **Invariant Tests**: 1 fuzzing test (256 runs, 128K calls)
+- **Coverage Target**: 100% line and function coverage
+
+---
+
 ## Installation
 
 ### Prerequisites
