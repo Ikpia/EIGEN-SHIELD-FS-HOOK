@@ -1,0 +1,18 @@
+# Pre-commit hook to prevent committing secrets
+# Install: pip install pre-commit && pre-commit install
+
+repos:
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package.lock.json
+
+  - repo: local
+    hooks:
+      - id: no-secrets
+        name: Check for secrets
+        entry: bash -c 'if grep -r "PRIVATE_KEY\|SECRET\|PASSWORD\|API_KEY" --include="*.sh" --include="*.sol" --include="*.js" --include="*.ts" . | grep -v ".env.example" | grep -v "SECURITY.md" | grep -v ".git"; then echo "❌ Secrets detected! Do not commit secrets."; exit 1; fi'
+        language: system
+        pass_filenames: false
